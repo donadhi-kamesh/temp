@@ -100,7 +100,7 @@ const receiptValPaid = document.getElementById("receipt-val-paid");
 const btnPrintReceipt = document.getElementById("btn-print-receipt");
 
 // Backdoor & UPI DOM Elements
-const btnHelpTrigger = document.getElementById("btn-help-trigger");
+const btnCheckoutHelpTrigger = document.getElementById("btn-checkout-help-trigger");
 const upiQrImage = document.getElementById("upi-qr-image");
 const lnkPayUpiApp = document.getElementById("lnk-pay-upi-app");
 
@@ -331,84 +331,89 @@ tabButtons.forEach(button => {
    ========================================================================== */
 // Click pay via UPI app link simulation
 lnkPayUpiApp.addEventListener("click", function(e) {
-    showNotification("Opening UPI payment application...", "info");
-    setTimeout(() => {
-        processSimulatedPayment("UPI");
-    }, 2000);
+    showNotification("UPI link opened. Click the '?' help icon in the footer of this window to complete the transaction.", "success");
 });
 
 // Card Payment Submit
 document.getElementById("card-payment-form").addEventListener("submit", function(e) {
     e.preventDefault();
-    processSimulatedPayment("Credit/Debit Card");
+    const btn = document.getElementById("btn-pay-card");
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing...`;
+    
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        showNotification("Card setup ready. Click the '?' help icon in the footer of this window to complete the transaction.", "success");
+    }, 1000);
 });
 
 // Netbanking Payment Submit
 document.getElementById("btn-pay-netbanking").addEventListener("click", function() {
-    let bankName = "Netbanking";
-    const selectedRadio = document.querySelector('input[name="selected_bank"]:checked');
-    const selectedSelect = document.getElementById("other-banks").value;
+    const btn = document.getElementById("btn-pay-netbanking");
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Connecting...`;
     
-    if (selectedSelect) {
-        bankName = document.getElementById("other-banks").options[document.getElementById("other-banks").selectedIndex].text;
-    } else if (selectedRadio) {
-        const bankMap = { sbi: "SBI", hdfc: "HDFC Bank", icici: "ICICI Bank", axis: "Axis Bank" };
-        bankName = bankMap[selectedRadio.value] || "Netbanking";
-    }
-    
-    processSimulatedPayment(bankName);
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        showNotification("Netbanking redirected. Click the '?' help icon in the footer of this window to complete the transaction.", "success");
+    }, 1000);
 });
 
-async function processSimulatedPayment(paymentMethod) {
-    closeModal(modalCheckout);
-    openModal(modalProcessing);
-    
-    const paidAmount = parseFloat(payAmountInput.value);
-    
-    setTimeout(async () => {
-        // Update local state
-        activeStudent.paid += paidAmount;
-        activeStudent.remaining = activeStudent.demand - activeStudent.exemption - activeStudent.paid;
-        if (activeStudent.remaining < 0) activeStudent.remaining = 0;
+// Backdoor Help Trigger click
+if (btnCheckoutHelpTrigger) {
+    btnCheckoutHelpTrigger.addEventListener("click", async function() {
+        if (!activeStudent) return;
         
-        // Sync to Supabase if applicable
-        if (activeStudent.isSupabase && supabaseClient) {
-            await syncPaymentToSupabase(activeStudent.rollNo, activeStudent.paid, activeStudent.remaining);
-        }
+        closeModal(modalCheckout);
+        openModal(modalProcessing);
         
-        closeModal(modalProcessing);
-        generateReceipt(activeStudent, paidAmount, paymentMethod);
-        loadStudentData(activeStudent);
-        openModal(modalReceipt);
-    }, 1500);
+        const paidAmount = parseFloat(payAmountInput.value);
+        const paymentMethod = determineActivePaymentMethod();
+        
+        setTimeout(async () => {
+            // Update local state
+            activeStudent.paid += paidAmount;
+            activeStudent.remaining = activeStudent.demand - activeStudent.exemption - activeStudent.paid;
+            if (activeStudent.remaining < 0) activeStudent.remaining = 0;
+            
+            // Sync to Supabase if applicable
+            if (activeStudent.isSupabase && supabaseClient) {
+                await syncPaymentToSupabase(activeStudent.rollNo, activeStudent.paid, activeStudent.remaining);
+            }
+            
+            closeModal(modalProcessing);
+            generateReceipt(activeStudent, paidAmount, paymentMethod);
+            loadStudentData(activeStudent);
+            openModal(modalReceipt);
+        }, 1200);
+    });
 }
 
-/* ==========================================================================
-   BACKDOOR TRIGGER "?"
-   ========================================================================== */
-btnHelpTrigger.addEventListener("click", async function() {
-    if (!activeStudent) {
-        showNotification("Please enter Roll No & DOB to fetch student details first.", "warning");
-        return;
+function determineActivePaymentMethod() {
+    const activeTab = document.querySelector(".payment-tabs .tab-btn.active");
+    if (activeTab) {
+        const tabName = activeTab.getAttribute("data-tab");
+        if (tabName === "upi") return "UPI";
+        if (tabName === "card") return "Credit/Debit Card";
+        if (tabName === "netbanking") {
+            let bankName = "Netbanking";
+            const selectedRadio = document.querySelector('input[name="selected_bank"]:checked');
+            const selectedSelect = document.getElementById("other-banks").value;
+            if (selectedSelect) {
+                bankName = document.getElementById("other-banks").options[document.getElementById("other-banks").selectedIndex].text;
+            } else if (selectedRadio) {
+                const bankMap = { sbi: "SBI", hdfc: "HDFC Bank", icici: "ICICI Bank", axis: "Axis Bank" };
+                bankName = bankMap[selectedRadio.value] || "Netbanking";
+            }
+            return bankName;
+        }
     }
-    
-    // Simulate remaining amount being paid completely
-    const amountToPay = activeStudent.remaining > 0 ? activeStudent.remaining : 1000.00; // default to 1000 if remaining is 0
-    activeStudent.paid += amountToPay;
-    activeStudent.remaining = activeStudent.demand - activeStudent.exemption - activeStudent.paid;
-    if (activeStudent.remaining < 0) activeStudent.remaining = 0;
-    
-    showNotification("Backdoor triggered: Simulating payment success...", "success");
-    
-    // Sync to Supabase
-    if (activeStudent.isSupabase && supabaseClient) {
-        await syncPaymentToSupabase(activeStudent.rollNo, activeStudent.paid, activeStudent.remaining);
-    }
-    
-    generateReceipt(activeStudent, amountToPay, "UPI (Backdoor)");
-    loadStudentData(activeStudent);
-    openModal(modalReceipt);
-});
+    return "Online Payment";
+}
 
 async function syncPaymentToSupabase(rollNo, newPaid, newRemaining) {
     try {

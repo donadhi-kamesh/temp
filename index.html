@@ -237,6 +237,271 @@
         </div>
     </div>
 
+    <!-- MODAL 2: Checkout Wizard -->
+    <div id="modal-checkout" class="modal-overlay hidden">
+        <div class="modal-card modal-medium animate-slide-up">
+            <header class="modal-header">
+                <h2><i class="fa-solid fa-shield-halved"></i> Secure Payment Gateway</h2>
+                <button class="modal-close btn-close-modal" data-target="modal-checkout">&times;</button>
+            </header>
+            <div class="modal-body">
+                <!-- Mini Bill Info -->
+                <div class="checkout-summary">
+                    <div class="summary-row">
+                        <span>Paying For:</span>
+                        <strong id="summary-student-name">D KAMESH</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>Roll Number:</span>
+                        <span id="summary-roll-no">B240611EC</span>
+                    </div>
+                    <div class="summary-row amount-row">
+                        <span>Total Amount:</span>
+                        <strong id="summary-amount">₹ 0.00</strong>
+                    </div>
+                </div>
+
+                <!-- Payment Tabs -->
+                <div class="payment-tabs">
+                    <button class="tab-btn active" data-tab="upi">
+                        <i class="fa-solid fa-qrcode"></i> UPI / QR
+                    </button>
+                    <button class="tab-btn" data-tab="card">
+                        <i class="fa-solid fa-credit-card"></i> Card
+                    </button>
+                    <button class="tab-btn" data-tab="netbanking">
+                        <i class="fa-solid fa-building-columns"></i> Netbanking
+                    </button>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-contents">
+                    <!-- Tab 1: UPI / QR -->
+                    <div id="tab-upi" class="tab-pane active">
+                        <div class="qr-payment-container">
+                            <div class="qr-code-box">
+                                <div class="qr-logo-overlay">
+                                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                                </div>
+                                <div id="qrcode-target">
+                                    <img id="upi-qr-image" src="" alt="UPI QR Code" style="max-width: 100%; height: auto; display: block;">
+                                </div>
+                            </div>
+                            <div class="qr-instructions">
+                                <p class="primary-instr">Scan QR Code using BHIM, GPAY, PhonePe, or Paytm</p>
+                                <p class="secondary-instr">Or click below to pay directly using any UPI App</p>
+                                <div class="upi-app-link-wrapper" style="width: 100%; max-width: 320px; margin: 10px auto 0 auto;">
+                                    <a id="lnk-pay-upi-app" href="#" class="btn-primary btn-full-width" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                        <i class="fa-solid fa-mobile-screen-button"></i> Pay via UPI App
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Credit/Debit Card -->
+                    <div id="tab-card" class="tab-pane">
+                        <form id="card-payment-form" class="payment-form">
+                            <div class="form-group">
+                                <label for="card-num">Card Number</label>
+                                <div class="input-icon-wrapper">
+                                    <input type="text" id="card-num" placeholder="4532 7182 9182 0019" maxlength="19" required>
+                                    <i class="fa-regular fa-credit-card input-icon"></i>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group half-width">
+                                    <label for="card-expiry">Expiry Date</label>
+                                    <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5" required>
+                                </div>
+                                <div class="form-group half-width">
+                                    <label for="card-cvv">CVV</label>
+                                    <input type="password" id="card-cvv" placeholder="•••" maxlength="3" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="card-holder">Card Holder Name</label>
+                                <input type="text" id="card-holder" placeholder="Name on card" required>
+                            </div>
+                            <button type="submit" id="btn-pay-card" class="btn-primary btn-full-width">
+                                Pay Securely
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab 3: Netbanking -->
+                    <div id="tab-netbanking" class="tab-pane">
+                        <div class="netbanking-container">
+                            <p class="select-bank-title">Select Popular Banks</p>
+                            <div class="bank-grid">
+                                <label class="bank-option">
+                                    <input type="radio" name="selected_bank" value="sbi" checked>
+                                    <span class="bank-card">
+                                        <i class="fa-solid fa-building-columns"></i>
+                                        <span>SBI</span>
+                                    </span>
+                                </label>
+                                <label class="bank-option">
+                                    <input type="radio" name="selected_bank" value="hdfc">
+                                    <span class="bank-card">
+                                        <i class="fa-solid fa-building-columns"></i>
+                                        <span>HDFC Bank</span>
+                                    </span>
+                                </label>
+                                <label class="bank-option">
+                                    <input type="radio" name="selected_bank" value="icici">
+                                    <span class="bank-card">
+                                        <i class="fa-solid fa-building-columns"></i>
+                                        <span>ICICI Bank</span>
+                                    </span>
+                                </label>
+                                <label class="bank-option">
+                                    <input type="radio" name="selected_bank" value="axis">
+                                    <span class="bank-card">
+                                        <i class="fa-solid fa-building-columns"></i>
+                                        <span>Axis Bank</span>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="form-group other-banks-select">
+                                <label for="other-banks">Or Select Other Bank</label>
+                                <div class="select-wrapper">
+                                    <select id="other-banks">
+                                        <option value="">-- Choose a Bank --</option>
+                                        <option value="pnb">Punjab National Bank</option>
+                                        <option value="canara">Canara Bank</option>
+                                        <option value="bob">Bank of Baroda</option>
+                                        <option value="union">Union Bank of India</option>
+                                        <option value="idbi">IDBI Bank</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button id="btn-pay-netbanking" class="btn-primary btn-full-width">
+                                Proceed to Netbanking
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="modal-footer checkout-footer">
+                <span class="ssl-shield"><i class="fa-solid fa-lock text-green"></i> 256-Bit SSL Encrypted Connection</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Processing Transaction -->
+    <div id="modal-processing" class="modal-overlay fixed-spinner hidden">
+        <div class="processing-card animate-scale-up">
+            <div class="loading-ring">
+                <div></div><div></div><div></div><div></div>
+            </div>
+            <h3>Processing Payment</h3>
+            <p>Please do not refresh the page or click back. We are securing your transaction with the bank.</p>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Payment Receipt (Success View) -->
+    <div id="modal-receipt" class="modal-overlay hidden">
+        <div class="modal-card modal-medium animate-slide-up receipt-card">
+            <div class="receipt-success-badge animate-pop">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            
+            <header class="receipt-header">
+                <h3>Payment Successful</h3>
+                <p>Transaction ID: <span id="receipt-tx-id">TXN928192018</span></p>
+                <div class="header-stamp">PAID</div>
+            </header>
+
+            <div class="modal-body printable-area" id="print-receipt-content">
+                <!-- Receipt Head inside print -->
+                <div class="receipt-print-header">
+                    <img src="logo-white.svg" alt="NITC Logo" class="receipt-logo-print">
+                    <div class="receipt-nitc-title">
+                        <h2>NATIONAL INSTITUTE OF TECHNOLOGY CALICUT</h2>
+                        <p>NIT Campus P.O., Kozhikode, Kerala - 673601</p>
+                        <h4>TUITION FEE PAYMENT RECEIPT</h4>
+                    </div>
+                </div>
+
+                <div class="receipt-divider"></div>
+
+                <!-- Academic Info -->
+                <div class="receipt-details-grid">
+                    <div class="receipt-item">
+                        <span class="rit-label">Student Name:</span>
+                        <strong id="receipt-student-name" class="rit-value">-</strong>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="rit-label">Roll Number:</span>
+                        <strong id="receipt-roll-no" class="rit-value">-</strong>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="rit-label">Payment Period:</span>
+                        <span id="receipt-period" class="rit-value">-</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="rit-label">Date & Time:</span>
+                        <span id="receipt-datetime" class="rit-value">-</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="rit-label">Payment Mode:</span>
+                        <span id="receipt-mode" class="rit-value">UPI</span>
+                    </div>
+                    <div class="receipt-item">
+                        <span class="rit-label">Status:</span>
+                        <span class="rit-value text-green font-bold">SUCCESS / PAID</span>
+                    </div>
+                </div>
+
+                <div class="receipt-divider"></div>
+
+                <!-- Financial Table -->
+                <table class="receipt-financial-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-right">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Academic Tuition Fee (Monsoon Period)</td>
+                            <td class="text-right" id="receipt-val-tuition">0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Registration & Laboratory Charges</td>
+                            <td class="text-right" id="receipt-val-other">0.00</td>
+                        </tr>
+                        <tr class="receipt-highlight-row">
+                            <td><strong>Amount Paid (INR)</strong></td>
+                            <td class="text-right"><strong id="receipt-val-paid">₹ 0.00</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="receipt-footer-notes">
+                    <p class="verification-note"><i class="fa-solid fa-circle-info"></i> This is a computer-generated transaction receipt. No signature is required.</p>
+                    <p class="support-note">For payment queries, contact: academic@nitc.ac.in or call: 0495-2286118.</p>
+                </div>
+            </div>
+
+            <footer class="modal-footer receipt-actions">
+                <button id="btn-print-receipt" class="btn-primary">
+                    <i class="fa-solid fa-print"></i> Print Receipt
+                </button>
+                <button id="btn-close-receipt" class="btn-secondary btn-close-modal" data-target="modal-receipt">
+                    Close Portal
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Floating Help / Backdoor Trigger FAB -->
+    <button id="btn-help-trigger" class="help-trigger-fab" title="Simulate Payment Success">
+        <i class="fa-solid fa-circle-question"></i>
+    </button>
+
     <!-- Script imports -->
     <script src="app.js"></script>
 </body>

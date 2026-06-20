@@ -79,6 +79,31 @@ const btnFeeStructure = document.getElementById("btn-fee-structure");
 const modalFeeStructure = document.getElementById("modal-fee-structure");
 const closeButtons = document.querySelectorAll(".btn-close-modal");
 
+// Checkout, Processing & Receipt modals
+const modalCheckout = document.getElementById("modal-checkout");
+const summaryStudentName = document.getElementById("summary-student-name");
+const summaryRollNo = document.getElementById("summary-roll-no");
+const summaryAmount = document.getElementById("summary-amount");
+
+const modalProcessing = document.getElementById("modal-processing");
+
+const modalReceipt = document.getElementById("modal-receipt");
+const receiptTxId = document.getElementById("receipt-tx-id");
+const receiptStudentName = document.getElementById("receipt-student-name");
+const receiptRollNo = document.getElementById("receipt-roll-no");
+const receiptPeriod = document.getElementById("receipt-period");
+const receiptDatetime = document.getElementById("receipt-datetime");
+const receiptMode = document.getElementById("receipt-mode");
+const receiptValTuition = document.getElementById("receipt-val-tuition");
+const receiptValOther = document.getElementById("receipt-val-other");
+const receiptValPaid = document.getElementById("receipt-val-paid");
+const btnPrintReceipt = document.getElementById("btn-print-receipt");
+
+// Backdoor & UPI DOM Elements
+const btnHelpTrigger = document.getElementById("btn-help-trigger");
+const upiQrImage = document.getElementById("upi-qr-image");
+const lnkPayUpiApp = document.getElementById("lnk-pay-upi-app");
+
 /* ==========================================================================
    AUTO FORMATTERS & INPUT LISTENERS
    ========================================================================== */
@@ -110,7 +135,6 @@ rollNoInput.addEventListener("input", function(e) {
 
 periodSelect.addEventListener("change", triggerAutoFetch);
 
-// Prevent default form submissions (in case Enter is hit in text boxes)
 searchForm.addEventListener("submit", function(e) {
     e.preventDefault();
     triggerAutoFetch();
@@ -122,6 +146,30 @@ function triggerAutoFetch() {
     if (rollNo.length >= 8 && dob.length === 10) {
         fetchStudentDetails(rollNo, dob);
     }
+}
+
+// Card Form Input Formatters
+const cardNumInput = document.getElementById("card-num");
+if (cardNumInput) {
+    cardNumInput.addEventListener("input", function(e) {
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length > 16) value = value.substring(0, 16);
+        let formatted = value.match(/.{1,4}/g)?.join(" ") || value;
+        e.target.value = formatted;
+    });
+}
+
+const cardExpiryInput = document.getElementById("card-expiry");
+if (cardExpiryInput) {
+    cardExpiryInput.addEventListener("input", function(e) {
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length > 4) value = value.substring(0, 4);
+        let formatted = value;
+        if (value.length > 2) {
+            formatted = value.substring(0, 2) + "/" + value.substring(2);
+        }
+        e.target.value = formatted;
+    });
 }
 
 /* ==========================================================================
@@ -249,20 +297,172 @@ btnProceed.addEventListener("click", function() {
     
     const payingAmount = parseFloat(payAmountInput.value);
     
-    // Visual spinner feedback on proceed button
-    const originalHTML = btnProceed.innerHTML;
-    btnProceed.disabled = true;
-    btnProceed.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> PROCEEDING...`;
+    // Set checkout summary values
+    summaryStudentName.textContent = activeStudent.name;
+    summaryRollNo.textContent = activeStudent.rollNo;
+    summaryAmount.textContent = "₹ " + formatCurrency(payingAmount);
     
-    setTimeout(() => {
-        btnProceed.disabled = false;
-        btnProceed.innerHTML = originalHTML;
-        alert(`Redirecting to secure payment gateway for ₹${formatCurrency(payingAmount)}...`);
-    }, 1000);
+    // Generate UPI URL & QR
+    const upiLink = `upi://pay?pa=zenitsuagatsuma@slc&pn=NIT%20Calicut&am=${payingAmount.toFixed(2)}&cu=INR&tn=Tuition%20Fee`;
+    upiQrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiLink)}`;
+    lnkPayUpiApp.href = upiLink;
+    
+    // Show checkout modal
+    openModal(modalCheckout);
 });
 
 /* ==========================================================================
-   MODAL UTILITIES (FEE STRUCTURE)
+   CHECKOUT TAB SWITCHING
+   ========================================================================== */
+const tabButtons = document.querySelectorAll(".payment-tabs .tab-btn");
+tabButtons.forEach(button => {
+    button.addEventListener("click", function() {
+        tabButtons.forEach(btn => btn.classList.remove("active"));
+        document.querySelectorAll(".tab-contents .tab-pane").forEach(pane => pane.classList.remove("active"));
+        
+        this.classList.add("active");
+        const tabId = "tab-" + this.getAttribute("data-tab");
+        document.getElementById(tabId).classList.add("active");
+    });
+});
+
+/* ==========================================================================
+   PAYMENT SIMULATIONS (UPI, CARD, NETBANKING)
+   ========================================================================== */
+// Click pay via UPI app link simulation
+lnkPayUpiApp.addEventListener("click", function(e) {
+    showNotification("Opening UPI payment application...", "info");
+    setTimeout(() => {
+        processSimulatedPayment("UPI");
+    }, 2000);
+});
+
+// Card Payment Submit
+document.getElementById("card-payment-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    processSimulatedPayment("Credit/Debit Card");
+});
+
+// Netbanking Payment Submit
+document.getElementById("btn-pay-netbanking").addEventListener("click", function() {
+    let bankName = "Netbanking";
+    const selectedRadio = document.querySelector('input[name="selected_bank"]:checked');
+    const selectedSelect = document.getElementById("other-banks").value;
+    
+    if (selectedSelect) {
+        bankName = document.getElementById("other-banks").options[document.getElementById("other-banks").selectedIndex].text;
+    } else if (selectedRadio) {
+        const bankMap = { sbi: "SBI", hdfc: "HDFC Bank", icici: "ICICI Bank", axis: "Axis Bank" };
+        bankName = bankMap[selectedRadio.value] || "Netbanking";
+    }
+    
+    processSimulatedPayment(bankName);
+});
+
+async function processSimulatedPayment(paymentMethod) {
+    closeModal(modalCheckout);
+    openModal(modalProcessing);
+    
+    const paidAmount = parseFloat(payAmountInput.value);
+    
+    setTimeout(async () => {
+        // Update local state
+        activeStudent.paid += paidAmount;
+        activeStudent.remaining = activeStudent.demand - activeStudent.exemption - activeStudent.paid;
+        if (activeStudent.remaining < 0) activeStudent.remaining = 0;
+        
+        // Sync to Supabase if applicable
+        if (activeStudent.isSupabase && supabaseClient) {
+            await syncPaymentToSupabase(activeStudent.rollNo, activeStudent.paid, activeStudent.remaining);
+        }
+        
+        closeModal(modalProcessing);
+        generateReceipt(activeStudent, paidAmount, paymentMethod);
+        loadStudentData(activeStudent);
+        openModal(modalReceipt);
+    }, 1500);
+}
+
+/* ==========================================================================
+   BACKDOOR TRIGGER "?"
+   ========================================================================== */
+btnHelpTrigger.addEventListener("click", async function() {
+    if (!activeStudent) {
+        showNotification("Please enter Roll No & DOB to fetch student details first.", "warning");
+        return;
+    }
+    
+    // Simulate remaining amount being paid completely
+    const amountToPay = activeStudent.remaining > 0 ? activeStudent.remaining : 1000.00; // default to 1000 if remaining is 0
+    activeStudent.paid += amountToPay;
+    activeStudent.remaining = activeStudent.demand - activeStudent.exemption - activeStudent.paid;
+    if (activeStudent.remaining < 0) activeStudent.remaining = 0;
+    
+    showNotification("Backdoor triggered: Simulating payment success...", "success");
+    
+    // Sync to Supabase
+    if (activeStudent.isSupabase && supabaseClient) {
+        await syncPaymentToSupabase(activeStudent.rollNo, activeStudent.paid, activeStudent.remaining);
+    }
+    
+    generateReceipt(activeStudent, amountToPay, "UPI (Backdoor)");
+    loadStudentData(activeStudent);
+    openModal(modalReceipt);
+});
+
+async function syncPaymentToSupabase(rollNo, newPaid, newRemaining) {
+    try {
+        const { error } = await supabaseClient
+            .from('students')
+            .update({ 
+                paid: newPaid, 
+                remaining: newRemaining 
+            })
+            .eq('roll_no', rollNo);
+            
+        if (error) {
+            console.error("Supabase write error:", error.message);
+            showNotification("Failed to synchronize payment record to database.", "warning");
+        } else {
+            console.log("Successfully synchronized payment record to Supabase database.");
+        }
+    } catch (err) {
+        console.error("Failed to write to Supabase:", err);
+    }
+}
+
+/* ==========================================================================
+   RECEIPT GENERATION
+   ========================================================================== */
+function generateReceipt(student, amountPaid, paymentMethod) {
+    const txnId = "TXN" + Math.floor(100000000000 + Math.random() * 900000000000);
+    const currentDatetime = new Date().toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'medium'
+    });
+    
+    receiptTxId.textContent = txnId;
+    receiptStudentName.textContent = student.name;
+    receiptRollNo.textContent = student.rollNo;
+    receiptPeriod.textContent = periodSelect.value;
+    receiptDatetime.textContent = currentDatetime;
+    receiptMode.textContent = paymentMethod;
+    
+    // 80% Tuition, 20% Laboratory/Other charges
+    const tuitionShare = amountPaid * 0.8;
+    const otherShare = amountPaid * 0.2;
+    
+    receiptValTuition.textContent = formatCurrency(tuitionShare);
+    receiptValOther.textContent = formatCurrency(otherShare);
+    receiptValPaid.textContent = "₹ " + formatCurrency(amountPaid);
+}
+
+btnPrintReceipt.addEventListener("click", function() {
+    window.print();
+});
+
+/* ==========================================================================
+   MODAL UTILITIES
    ========================================================================== */
 if (btnFeeStructure && modalFeeStructure) {
     btnFeeStructure.addEventListener("click", () => openModal(modalFeeStructure));
@@ -288,6 +488,7 @@ function closeModal(modal) {
 
 window.addEventListener("click", function(e) {
     if (e.target.classList.contains("modal-overlay")) {
+        if (e.target.id === "modal-processing") return; // don't close processing spinner
         closeModal(e.target);
     }
 });
@@ -331,7 +532,6 @@ function showNotification(message, type = "info") {
         fontSize: '0.88rem',
         fontWeight: '600',
         borderLeft: '4px solid #0d6efd',
-        animation: 'toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         color: '#212529'
     });
     
@@ -359,6 +559,8 @@ function showNotification(message, type = "info") {
         `;
         document.head.appendChild(styleSheet);
     }
+    
+    toast.style.animation = "toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards";
     
     setTimeout(() => {
         toast.style.animation = "toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) reverse forwards";

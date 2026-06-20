@@ -903,6 +903,492 @@ body {
     animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+/* ==========================================================================
+   SECURE CHECKOUT STYLES
+   ========================================================================== */
+.checkout-summary {
+    background-color: var(--bg-input);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.summary-row:last-child {
+    margin-bottom: 0;
+}
+
+.summary-row.amount-row {
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    margin-top: 10px;
+    color: var(--text-main);
+}
+
+.summary-row.amount-row strong {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+/* Secure checkout tabs */
+.payment-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 24px;
+    gap: 8px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-light);
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tab-btn:hover {
+    color: var(--text-main);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-contents .tab-pane {
+    display: none;
+}
+
+.tab-contents .tab-pane.active {
+    display: block;
+}
+
+/* UPI Payment Panel */
+.qr-payment-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.qr-code-box {
+    width: 180px;
+    height: 180px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+#qrcode-target {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-logo-overlay {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    border: 2px solid #ffffff;
+}
+
+.qr-instructions {
+    text-align: center;
+    width: 100%;
+}
+
+.qr-instructions .primary-instr {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.qr-instructions .secondary-instr {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    margin-bottom: 16px;
+}
+
+/* Card Payment Form */
+.payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.half-width {
+    flex: 1;
+}
+
+/* Netbanking Panel */
+.select-bank-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bank-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.bank-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.bank-card {
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.bank-card i {
+    font-size: 1.25rem;
+    color: var(--text-light);
+}
+
+.bank-card span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.bank-option input:checked + .bank-card {
+    border-color: var(--primary-color);
+    background-color: var(--primary-light);
+}
+
+.bank-option input:checked + .bank-card i {
+    color: var(--primary-color);
+}
+
+.other-banks-select {
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+    margin-bottom: 24px;
+}
+
+.checkout-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f1f3f7;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.ssl-shield {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   PROCESSING / SPINNER SYSTEM
+   ========================================================================== */
+.fixed-spinner {
+    background-color: rgba(33, 37, 41, 0.65);
+}
+
+.processing-card {
+    background-color: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.processing-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+.processing-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Dynamic CSS loading ring */
+.loading-ring {
+    display: inline-block;
+    position: relative;
+    width: 64px;
+    height: 64px;
+}
+.loading-ring div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    margin: 6px;
+    border: 6px solid var(--primary-color);
+    border-radius: 50%;
+    animation: loading-ring-anim 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: var(--primary-color) transparent transparent transparent;
+}
+.loading-ring div:nth-child(1) {
+    animation-delay: -0.45s;
+}
+.loading-ring div:nth-child(2) {
+    animation-delay: -0.3s;
+}
+.loading-ring div:nth-child(3) {
+    animation-delay: -0.15s;
+}
+@keyframes loading-ring-anim {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   RECEIPT MODAL (SUCCESS SYSTEM)
+   ========================================================================== */
+.receipt-card {
+    position: relative;
+    overflow: visible;
+}
+
+.receipt-success-badge {
+    position: absolute;
+    top: -36px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 72px;
+    height: 72px;
+    background-color: var(--success-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 2rem;
+    box-shadow: 0 4px 16px rgba(25, 135, 84, 0.4);
+    border: 4px solid #ffffff;
+    z-index: 1010;
+}
+
+.receipt-header {
+    text-align: center;
+    padding-top: 50px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed var(--border-color);
+    position: relative;
+}
+
+.receipt-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--success-color);
+    margin-bottom: 4px;
+}
+
+.receipt-header p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.header-stamp {
+    position: absolute;
+    right: 28px;
+    top: 50px;
+    border: 3.5px double var(--success-color);
+    color: var(--success-color);
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transform: rotate(-12deg);
+    opacity: 0.85;
+}
+
+.receipt-divider {
+    height: 1px;
+    border-top: 1px dashed var(--border-color);
+    margin: 18px 0;
+}
+
+.receipt-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.receipt-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.rit-label {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.rit-value {
+    font-size: 0.88rem;
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.receipt-financial-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+.receipt-financial-table th {
+    color: var(--text-light);
+    font-weight: 700;
+    text-align: left;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid var(--border-color);
+}
+
+.receipt-financial-table td {
+    padding: 10px 0;
+    color: var(--text-muted);
+    border-bottom: 1px solid #f1f3f7;
+}
+
+.receipt-highlight-row td {
+    border-top: 1.5px solid var(--border-color);
+    border-bottom: 2px double var(--border-color);
+    color: var(--text-main);
+    padding: 12px 0;
+}
+
+.receipt-highlight-row strong {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: var(--text-blue);
+}
+
+.receipt-footer-notes {
+    font-size: 0.74rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    background-color: #fafbfd;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid #f1f3f7;
+}
+
+.receipt-footer-notes p {
+    margin-bottom: 4px;
+}
+
+.receipt-footer-notes p:last-child {
+    margin-bottom: 0;
+}
+
+.receipt-nitc-title h2 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+/* Backdoor help trigger FAB styles */
+.help-trigger-fab {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #495057;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    z-index: 999;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.help-trigger-fab:hover {
+    background-color: #343a40;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.text-right {
+    text-align: right;
+}
+
 /* Helper Utilities */
 .hidden {
     display: none !important;

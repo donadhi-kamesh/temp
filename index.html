@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuition Fee Payment | National Institute of Technology Calicut</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-container">
+                    <img src="logo-white.svg" alt="NIT Calicut Logo" class="nitc-logo">
+                </div>
+                <div class="header-divider"></div>
+                <h1 class="header-title">Tuition Fee Payment</h1>
+            </div>
+            <div class="header-right">
+                <button id="btn-fee-structure" class="btn-fee-structure">FEE STRUCTURE</button>
+            </div>
+        </header>
+
+        <!-- Notification Banner -->
+        <div class="info-banner">
+            <span class="info-icon-wrapper">
+                <i class="fa-regular fa-circle-check"></i>
+            </span>
+            <p class="info-text">
+                Please enter your Roll Number and Date of Birth. Based on the information available in our records for you, the amount due has been computed. Please check the Fee Structure on the top right corner for details.
+            </p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <main class="main-content">
+            <!-- Left Panel: Details Form -->
+            <section class="panel-left">
+                <div class="panel-header">
+                    <h2 class="panel-title">Details</h2>
+                    <span class="tooltip-trigger" title="Enter your academic and registration details here">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </span>
+                </div>
+                
+                <form id="payment-search-form" class="details-form" autocomplete="off">
+                    <div class="form-group">
+                        <label for="period">Period <span class="required">*</span></label>
+                        <div class="select-wrapper">
+                            <select id="period" name="period" required>
+                                <option value="2026-2027 Monsoon">2026-2027 Monsoon</option>
+                                <option value="2025-2026 Winter" selected>2025-2026 Winter</option>
+                                <option value="2025-2026 Monsoon">2025-2026 Monsoon</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="roll-no">Roll No <span class="required">*</span></label>
+                        <input type="text" id="roll-no" name="roll_no" placeholder="" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dob">Date Of Birth<span class="required">*</span></label>
+                        <div class="input-icon-wrapper">
+                            <input type="text" id="dob" name="dob" placeholder="" required>
+                            <i class="fa-regular fa-calendar-days input-icon calendar-trigger" id="calendar-icon"></i>
+                        </div>
+                        <span class="input-hint">Format: DD/MM/YYYY</span>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right Panel: Student Info & Fee Details -->
+            <section class="panel-right">
+                <!-- State 1: Placeholder (When details are not yet loaded) -->
+                <div id="details-placeholder" class="placeholder-container">
+                    <div class="placeholder-glow"></div>
+                    <div class="placeholder-icon">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <h3>Verify Registration</h3>
+                    <p>Enter your Period, Roll Number, and Date of Birth on the left to securely retrieve your computed tuition fees.</p>
+                </div>
+
+                <!-- State 2: Student Details Content (Hidden initially) -->
+                <div id="student-details-content" class="student-details-container hidden">
+                    <!-- Student Header -->
+                    <div class="student-header">
+                        <div class="accent-bar"></div>
+                        <div class="student-meta">
+                            <span class="meta-label">Student Name</span>
+                            <h2 id="student-name" class="student-name-text">-</h2>
+                        </div>
+                    </div>
+
+                    <!-- Fee Grid -->
+                    <div class="fee-grid">
+                        <!-- Box 1: Demand Amount -->
+                        <div class="fee-box">
+                            <span class="fee-label">Demand Amount</span>
+                            <div class="fee-value-wrapper">
+                                <span id="val-demand" class="fee-value">0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Box 2: Exemption Amount -->
+                        <div class="fee-box">
+                            <span class="fee-label">Exemption Amount</span>
+                            <div class="fee-value-wrapper">
+                                <span id="val-exemption" class="fee-value">0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Box 3: Remaining Amount -->
+                        <div class="fee-box font-highlight">
+                            <span class="fee-label">Remaining Amount to be Paid</span>
+                            <div class="fee-value-wrapper">
+                                <span id="val-remaining" class="fee-value">0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Box 4: Fees Already Paid -->
+                        <div class="fee-box">
+                            <span class="fee-label">Fees Already Paid</span>
+                            <div class="fee-value-wrapper">
+                                <span id="val-paid" class="fee-value">0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Box 5: Enter Amount to Pay -->
+                        <div class="fee-box input-box highlight-green">
+                            <span class="fee-label">Enter Amount to Pay</span>
+                            <div class="fee-input-wrapper">
+                                <input type="number" id="input-pay-amount" min="0" step="100" placeholder="0.00">
+                            </div>
+                            <span id="amount-validation-msg" class="validation-hint hidden">Cannot exceed remaining amount</span>
+                        </div>
+                    </div>
+
+                    <div class="declaration-container">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="declaration-check" checked>
+                            <span class="checkbox-custom"></span>
+                            <span class="declaration-text">
+                                I'm paying the fees as per the fee information displayed. I have verified the fee structure (PDF above) as well. In case of mismatch, I agree to pay any further dues as notified by academic section
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Bottom Action Bar -->
+                    <div class="action-bar">
+                        <button id="btn-proceed" class="btn-primary btn-large">
+                            PROCEED TO PAY
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+
+
+    <!-- MODAL 1: Fee Structure Table -->
+    <div id="modal-fee-structure" class="modal-overlay hidden">
+        <div class="modal-card modal-large animate-slide-up">
+            <header class="modal-header">
+                <h2><i class="fa-solid fa-table"></i> NIT Calicut - Fee Structure (Monsoon 2026)</h2>
+                <button class="modal-close btn-close-modal" data-target="modal-fee-structure">&times;</button>
+            </header>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="fee-structure-table">
+                        <thead>
+                            <tr>
+                                <th>Sl No.</th>
+                                <th>Category / Semester</th>
+                                <th>Tuition Fee (₹)</th>
+                                <th>Other Fees (₹)</th>
+                                <th>Total per Semester (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>B.Tech / B.Arch (General/OBC - Family Income > 5 Lakhs)</td>
+                                <td>62,500.00</td>
+                                <td>12,500.00</td>
+                                <td>75,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>B.Tech / B.Arch (General/OBC - Family Income 1 to 5 Lakhs)</td>
+                                <td>20,833.00</td>
+                                <td>12,500.00</td>
+                                <td>33,333.00</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>B.Tech / B.Arch (SC/ST/PwD / Family Income < 1 Lakh)</td>
+                                <td>0.00</td>
+                                <td>12,500.00</td>
+                                <td>12,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>M.Tech / M.Plan (All Categories)</td>
+                                <td>35,000.00</td>
+                                <td>15,000.00</td>
+                                <td>50,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Ph.D. Research Scholars</td>
+                                <td>15,000.00</td>
+                                <td>15,500.00</td>
+                                <td>30,500.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="notice-box info">
+                    <strong>Note:</strong> SC/ST/PwD students are fully exempted from tuition fees. General and OBC students with family income between 1 to 5 Lakhs get a 2/3rd exemption, and below 1 Lakh get full tuition fee exemption.
+                </div>
+            </div>
+            <footer class="modal-footer">
+                <button class="btn-secondary btn-close-modal" data-target="modal-fee-structure">Close</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Script imports -->
+    <script src="app.js"></script>
+</body>
+</html>
